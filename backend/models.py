@@ -19,6 +19,7 @@ class AssignmentModel(BaseModel):
     description: str | None = None
     courseNum: str | None = None
     URL: str
+    isCompleted: bool = False
     model_config = ConfigDict(
         json_schema_extra={
             "example": {

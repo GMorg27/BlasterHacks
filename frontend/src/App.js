@@ -11,12 +11,15 @@ function App() {
   const [allUsers, setAllUsers] = useState([]);
   // const [ics, setIcs] = useState([]);
   const [assignments, setAllAssignments] = useState([]);
+  const [showCompleted, setShowCompleted] = useState(false);
+
+
 
   // Fetch the user list when the page loads
   useEffect(() => {
     getAllUsers()
-    .then((users) => setAllUsers(users))
-    .catch((error) => console.error("Error:", error));
+      .then((users) => setAllUsers(users))
+      .catch((error) => console.error("Error:", error));
   }, []); // Empty dependency array means this will run only once, when the page first loads.
 
   // Fetch assignments whenever currentPage changes to '/home'
@@ -30,7 +33,23 @@ function App() {
           .catch((error) => console.error("Error:", error));
       }
     }
-  }, [currentPage]); // This will run every time currentPage change
+  }, [currentPage]);
+
+  const handleFilterChange = (event) => {
+    setShowCompleted(event.target.checked); // Update filter state
+  };
+
+  const filteredAssignments = assignments.filter((assignment) => 
+    showCompleted ? assignment.isComplete : !assignment.isComplete
+  );
+
+  const handleCompletionToggle = (index) => {
+    const updatedAssignments = assignments.map((assignment, i) =>
+      i === index ? { ...assignment, isComplete: !assignment.isComplete } : assignment
+    );
+    setAllAssignments(updatedAssignments);
+  };
+
 
   function loginPressed() {
     if (username.trim() === "") {
@@ -62,14 +81,14 @@ function App() {
 
     const user = new User(username);
     createNewUser(user)
-    .then((data) => {
-      getAllUsers()
-      .then((users) => setAllUsers(users))
+      .then((data) => {
+        getAllUsers()
+          .then((users) => setAllUsers(users))
+          .catch((error) => console.error("Error:", error));
+        login(username)
+      })
       .catch((error) => console.error("Error:", error));
-      login(username)
-    })
-    .catch((error) => console.error("Error:", error));
-    
+
   }
 
   function login(username) {
@@ -98,20 +117,20 @@ function App() {
     window.history.pushState({}, '', '/home');
     setCurrentPage('/home');
   }
-  
+
   function uploadICSFile(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
       uploadICSString(event.target.result, localStorage.getItem("username"))
-      .then((data) => {
-        getUserAssignments(username)
-        .then((assignments) => setAllAssignments(assignments))
+        .then((data) => {
+          getUserAssignments(username)
+            .then((assignments) => setAllAssignments(assignments))
+            .catch((error) => console.error("Error:", error));
+        })
         .catch((error) => console.error("Error:", error));
-      })
-      .catch((error) => console.error("Error:", error));
     };
 
     reader.readAsText(file);
@@ -120,8 +139,8 @@ function App() {
 
   return (
     <div>
-      <script src="https://kit.fontawesome.com/04231664ea.js" crossorigin="anonymous"></script>
-      
+      <script src="https://kit.fontawesome.com/04231664ea.js" crossOrigin="anonymous"></script>
+
       {currentPage === '/' && (
         <div className="module">
           <h1>BlasterHacks 2025</h1>
@@ -150,25 +169,34 @@ function App() {
         <div className="container">
           <div className="module">
             <h1>Welcome, {localStorage.getItem("username")}!</h1>
-            
+
             <div className="margin-lg">
               <button onClick={Settings} style={{ marginRight: "10px" }}>Settings</button>
               <button onClick={logout}>Logout</button>
             </div>
-            <input className="file-upload" type="file" onChange={(e) => uploadICSFile(e)}/>
+            <input className="file-upload" type="file" onChange={(e) => uploadICSFile(e)} />
 
             <div style={{ textAlign: "left" }}><h2>Tasks</h2></div>
             <div className="scrollable" id="assignment-list">
               <ul>
-                {assignments.length === 0 ? 
-                <p>No assignments left! Good job :)</p>
-                : assignments.map((assignment, index) => (
-                  <div className="card" key={index}>
-                    <p id="title">{assignment.title}</p>
-                    <p id="date">Due: {assignment.dueDate}</p>
-                    <p id="desc">{assignment.description}</p>
-                  </div>
-                ))}
+                {filteredAssignments.length === 0 ? (
+                  <li>No assignments left! Good job </li>) : (
+                  filteredAssignments.map((assignment, index) => (
+                    <li className="card" key={index}>
+                      <p id="title">{assignment.title}</p>
+                      <p id="date">Due: {assignment.dueDate}</p>
+                      <p id="desc">{assignment.description}</p>
+                      <input
+                        type="checkbox"
+                        className= "Checkbox"
+                        id="completed"
+                        name="completed"
+                        checked={assignment.completed}
+                        onChange={() => handleCompletionToggle(index)}
+                      />
+                    </li>
+                  ))
+                )}
               </ul>
             </div>
           </div>
@@ -181,12 +209,12 @@ function App() {
                 type="text"
                 id="friendname"
                 name="friendname"
-                // value={username}
-                // onChange={(e) => setUsername(e.target.value)}
+              // value={username}
+              // onChange={(e) => setUsername(e.target.value)}
               />
             </div>
 
-            
+
           </div>
         </div>
       )}
@@ -199,7 +227,7 @@ function App() {
             <button onClick={goHome}>Home</button>
           </div>
           <p>Re-upload Calendar</p>
-          <input className="file-upload" type="file" onChange={(e) => uploadICSFile(e)}/>
+          <input className="file-upload" type="file" onChange={(e) => uploadICSFile(e)} />
         </div>
       )}
     </div>
