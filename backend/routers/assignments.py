@@ -1,4 +1,5 @@
 import os
+import re
 
 from fastapi import APIRouter, Body, HTTPException, Query, status
 from pydantic import BaseModel
@@ -68,11 +69,14 @@ async def parse_ICS(icsString: str) -> list[AssignmentModel]:
 
             attr = line[:splitLoc]
             value = line[splitLoc+1:]
-            if attr == "DTEND":
+            courseNum = ""
+            if attr == "DSTART":
                 assignment["dueDate"] = value
             elif attr == "DESCRIPTION":
                 assignment["description"]  = value
             elif attr == "SUMMARY":
+                courseNum = re.search(r'.*[\[.*\]]', value)
+                assignment["courseNum"] = courseNum
                 assignment["title"] = value
             elif attr == "URL;VALUE=URI":
                 assignment["URL"] = value

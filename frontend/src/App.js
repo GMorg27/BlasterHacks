@@ -40,7 +40,7 @@ function App() {
 
         window.history.pushState({}, '', '/home');
         setCurrentPage('/home');
-
+        
         return;
       }
     }
