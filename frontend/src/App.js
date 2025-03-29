@@ -3,13 +3,14 @@ import './styles.css';
 import { useEffect, useState } from "react";
 import { createNewUser, getAllUsers } from './accessors/userAccessor.js';
 import { User } from "./models/user.ts";
-import { uploadICSString } from './accessors/assignmentAccessor.js';
+import { getUserAssignments, uploadICSString } from './accessors/assignmentAccessor.js';
 
 function App() {
+  const [currentPage, setCurrentPage] = useState(window.location.pathname); // Track the current page
   const [username, setUsername] = useState("");
   const [allUsers, setAllUsers] = useState([]);
   // const [ics, setIcs] = useState([]);
-  const [currentPage, setCurrentPage] = useState(window.location.pathname); // Track the current page
+  const [assignments, setAllAssignments] = useState([]);
 
   useEffect(() => { // Only execute once when the page is opened
     getAllUsers()
@@ -33,14 +34,18 @@ function App() {
     }
 
     for (let user of allUsers) {
-      console.log(user.name);
       if (user.name === username) {
         console.log("Logging in as:", username);
         localStorage.setItem("username", username); // Store the username in local storage
 
+        // Redirect to home page
         window.history.pushState({}, '', '/home');
         setCurrentPage('/home');
-        
+
+        getUserAssignments(username)
+        .then((assignments) => setAllAssignments(assignments))
+        .catch((error) => console.error("Error:", error));
+
         return;
       }
     }
@@ -125,11 +130,21 @@ function App() {
         <div className="module">
           <div>
             <h1>Welcome, {localStorage.getItem("username")}!</h1>
-            <p>This is the home page.</p>
             <button onClick={Settings}>Settings and Preferences</button>
             <button onClick={logout}>Logout</button>
           </div>
           <input type="file" onChange={(e) => uploadICSFile(e)}/>
+
+          <div className="scrollable" id="assignment-list">
+            <ul>
+              {assignments.map((assignment, index) => (
+                <div className="card" key={index}>
+                  <p id="title">{assignment.title}</p>
+                  <p>{assignment.description}</p>
+                </div>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 
