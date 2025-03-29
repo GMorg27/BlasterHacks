@@ -96,9 +96,9 @@ function App() {
 
 
   return (
-    <div className="container">
+    <div>
       {currentPage === '/' && (
-        <div className="container">
+        <div className="module">
           <h1>BlasterHacks 2025</h1>
 
           <div id="sign-in">
@@ -122,7 +122,7 @@ function App() {
       )}
 
       {currentPage === '/home' && (
-        <div className="container">
+        <div className="module">
           <div>
             <h1>Welcome, {localStorage.getItem("username")}!</h1>
             <p>This is the home page.</p>
@@ -134,7 +134,7 @@ function App() {
       )}
 
       {currentPage === '/settings' && (
-        <div className="container">
+        <div className="module">
           <div>
             <h1>Settings</h1>
             <p>This is the settings page.</p>
