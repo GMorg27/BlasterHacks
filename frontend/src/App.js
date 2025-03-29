@@ -12,20 +12,24 @@ function App() {
   // const [ics, setIcs] = useState([]);
   const [assignments, setAllAssignments] = useState([]);
 
-  useEffect(() => { // Only execute once when the page is opened
+  // Fetch the user list when the page loads
+  useEffect(() => {
     getAllUsers()
-    .then((users) => setAllUsers(users))
-    .catch((error) => console.error("Error:", error));
+      .then((users) => setAllUsers(users))
+      .catch((error) => console.error("Error:", error));
+  }, []); // Empty dependency array means this will run only once, when the page first loads.
 
-    const handleLocationChange = () => setCurrentPage(window.location.pathname);
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
-  }, []);
-  // useEffect(() => { 
-  //   uploadICSFile()
-  //     .then((ics) => setIcs(ics))
-  //     .catch((error) => console.error("Error:", error));
-  // }, []);
+  // Fetch assignments whenever currentPage changes to '/home'
+  useEffect(() => {
+    if (currentPage === '/home') {
+      const loggedInUsername = localStorage.getItem("username");
+      if (loggedInUsername) {
+        getUserAssignments(loggedInUsername)
+          .then((assignments) => setAllAssignments(assignments))
+          .catch((error) => console.error("Error:", error));
+      }
+    }
+  }, [currentPage]); // This will run every time currentPage change
 
   function login() {
     if (username.trim() === "") {
@@ -41,10 +45,6 @@ function App() {
         // Redirect to home page
         window.history.pushState({}, '', '/home');
         setCurrentPage('/home');
-
-        getUserAssignments(username)
-        .then((assignments) => setAllAssignments(assignments))
-        .catch((error) => console.error("Error:", error));
 
         return;
       }
@@ -68,7 +68,6 @@ function App() {
 
   function logout() {
     window.history.pushState({}, '', '/');
-    window.location.reload();
     setCurrentPage('/');
     console.log("Logging out of", username);
     localStorage.removeItem("username");
@@ -81,8 +80,6 @@ function App() {
 
   function goHome() {
     window.history.pushState({}, '', '/home');
-    window.location.reload();
-
     setCurrentPage('/home');
   }
   
@@ -93,6 +90,11 @@ function App() {
     const reader = new FileReader();
     reader.onload = function(event) {
       uploadICSString(event.target.result, localStorage.getItem("username"))
+      .then((data) => {
+        getUserAssignments(username)
+        .then((assignments) => setAllAssignments(assignments))
+        .catch((error) => console.error("Error:", error));
+      })
       .catch((error) => console.error("Error:", error));
     };
 

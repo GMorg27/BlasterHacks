@@ -21,13 +21,10 @@ class AssignmentModel(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "DateAndTime": "2023-10-01T10:00:00",
-                "DueDate": "2023-10-15",
-                "Description": "Complete the project report.",
-                "Title": "Project Report",
-                "CourseNum": "CS101",
+                "dueDate": "2023-10-15",
+                "description": "Complete the project report.",
+                "title": "Project Report",
                 "URL": "http://example.com/assignment",
-                "exam": False,
             }
         },
     )
