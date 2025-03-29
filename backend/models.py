@@ -44,3 +44,10 @@ class UpdateUserModel(BaseModel):
             }
         },
     )
+
+
+class Assignment() :
+
+
+
+class UpdateAssignment():
