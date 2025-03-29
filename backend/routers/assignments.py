@@ -18,6 +18,23 @@ class UserCollection(BaseModel):
     users: list[UserModel]
 
 
+@router.get(
+    "/",
+    response_description="Get all assignments for user",
+    response_model=list[AssignmentModel],
+    status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,
+)
+async def get_user_assignments(username: str = Query(...)):
+    """
+    POST request to upload a list of assignments from a file for the given user.
+    """
+    user = await db.users.find_one({"name": username})
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User {username} not found")
+    
+    return user["tasks"]
+
 @router.post(
     "/upload",
     response_description="Upload list of assignments from string",
@@ -29,7 +46,7 @@ async def upload_assignments(icsString: str = Body(...), username: str = Query(.
     """
     POST request to upload a list of assignments from a file for the given user.
     """
-    user = db.users.find_one({"name": username})
+    user = await db.users.find_one({"name": username})
     if user is None:
         raise HTTPException(status_code=404, detail=f"User {username} not found")
     

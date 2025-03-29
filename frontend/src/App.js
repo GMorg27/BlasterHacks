@@ -140,7 +140,8 @@ function App() {
               {assignments.map((assignment, index) => (
                 <div className="card" key={index}>
                   <p id="title">{assignment.title}</p>
-                  <p>{assignment.description}</p>
+                  <p id="date">Due: {assignment.dueDate}</p>
+                  <p id="desc">{assignment.description}</p>
                 </div>
               ))}
             </ul>
