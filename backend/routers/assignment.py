@@ -22,6 +22,4 @@ async def upload_assignments(icsString: str = Body(...)):
     """
     new_assignments = []
 
-    
-
     return new_assignments
