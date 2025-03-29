@@ -1,7 +1,9 @@
 export class User {
-    name: String;
+    name: string;
+    tasks: string[]
 
-    constructor(name: String) {
+    constructor(name: string) {
         this.name = name;
+        this.tasks = [];
     }
 }

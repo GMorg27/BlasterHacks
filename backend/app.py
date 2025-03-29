@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import users
-from routers import icsFile
+from routers import assignments, users
 
 app = FastAPI(
     title="BlasterHacks",
@@ -17,4 +16,4 @@ app.add_middleware(
 )
 
 app.include_router(users.router)
-app.include_router(icsFile.router)
+app.include_router(assignments.router)

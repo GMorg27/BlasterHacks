@@ -1,6 +1,3 @@
-import { ICS } from "../models/icsString.ts";
-
-
 // POST request to send ICS file to the backend
 export async function uploadICSFile(icsString) {
   try {
