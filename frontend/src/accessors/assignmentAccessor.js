@@ -2,6 +2,7 @@
 export async function getUserAssignments(username) {
     const queryParam = "?username=" + username;
     const URL = "http://localhost:8000/assignments/" + queryParam;
+    const isCompleted = false; 
     try {
         const response = await fetch(URL, {
             method: "GET",

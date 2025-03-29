@@ -1,5 +1,7 @@
 import os
 
+import re
+
 from fastapi import APIRouter, Body, HTTPException, Query, status
 from pydantic import BaseModel
 
@@ -62,36 +64,45 @@ async def upload_assignments(icsString: str = Body(...), username: str = Query(.
 
 async def parse_ICS(icsString: str) -> list[AssignmentModel]:
     """
-    Helper function to parse an ICS string.
+    Parses an ICS string and extracts assignments.
     """
     new_assignments = []
-    lines = icsString.splitlines()
+    assignment = {}
+    
+    
+    
+    # Find all VEVENT sections
+    events = re.findall(r"BEGIN:VEVENT(.*?)END:VEVENT", icsString, re.S)
+    
+    for event in events:
+        # Extract due date
+        assignment_due = re.search(r"DTSTART;.*:(\d+)", event)
+        assignment["dueDate"] = assignment_due.group(1) if assignment_due else None
 
-    i = 0
-    assignment = None
-    while i < len(lines):
-        line = lines[i]
-        i += 1
+        # Extract summary (title)
+        assignment_title = re.search(r"SUMMARY:(.+)", event)
+        assignment["title"] = assignment_title.group(1) if assignment_title else None
 
-        if line == "BEGIN:VEVENT":
-            assignment = {}
-        elif line == "END:VEVENT" and assignment is not None:
-            new_assignments.append(AssignmentModel(**assignment))
-            assignment = None
-        elif assignment is not None:
-            splitLoc = line.find(":")
-            if splitLoc == -1:
-                continue
+        # Extract description
+        assignment_description = re.search(r"DESCRIPTION:(.+?)(?=\n[A-Z-]+:|$)", event, re.S)
+        
+        assignment["description"] = ((assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")[:250])+"..." if len(assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")) > 250 else assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")) if assignment_description else None
 
-            attr = line[:splitLoc]
-            value = line[splitLoc+1:]
-            if attr == "DTSTART":
-                assignment["dueDate"] = value
-            elif attr == "DESCRIPTION":
-                assignment["description"]  = value
-            elif attr == "SUMMARY":
-                assignment["title"] = value
-            elif attr == "URL;VALUE=URI":
-                assignment["URL"] = value
+        # Extract course number (if present in brackets)
+        course_match = re.search(r"SUMMARY:(.+)\[(.*?)\]", event) if event else None
+        assignment["courseNum"] = course_match.group(1) if course_match else None
+
+        # Extract URL
+        assignment_url = re.search(r"URL;VALUE=URI:(.+)", event)
+        assignment["URL"] = assignment_url.group(1) if assignment_url else None
+
+        # Determine if it's an exam
+        is_exam = any(word in assignment_title.group() for word in ["Exam", "Midterm", "Final"]) if assignment_title else False
+
+        # Create an AssignmentModel instance
+        new_assignments.append(AssignmentModel(**assignment))
+
+        assignment = {}
 
     return new_assignments
+
