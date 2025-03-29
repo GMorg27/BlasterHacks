@@ -1,26 +1,26 @@
-import { User } from "../models/user.ts";
+import { ICS } from "../models/icsString.ts";
 
 
 // POST request to send ICS file to the backend
-export async function uploadICSFile(user) {
-    try {
-        const response = await fetch("http://localhost:8000/users", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(user)
-        });
-        
-        if (!response.ok) {
-            throw new Error("Failed to create new user");
-        }
-
-        const data = await response.json();
-        console.log("Success:", data);
-        return;
-    } catch (error) {
-        console.error("Error:", error);
-        throw error;
+export async function uploadICSFile(icsString) {
+  try {
+    const response = await fetch("http://localhost:8000/icsFiles", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(icsString)
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to upload ICS file");
     }
+
+    const data = await response.json();
+    console.log("Success:", data);
+    return data;
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
 }

@@ -4,7 +4,9 @@ import './Settings.css';
 
 import { useEffect, useState } from "react";
 import { createNewUser, getAllUsers } from './accessors/userAccessor.js';
+import { uploadICSFile } from './accessors/icsAccessor.js';
 import { User } from "./models/user.ts";
+import { ICS } from "./models/icsString.ts";
 
 /**
  * The starting page for the app, prompting the user to log in or sign up.
@@ -25,6 +27,12 @@ function App() {
     window.addEventListener('popstate', handleLocationChange);
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
+  useEffect(() => { 
+    uploadICSFile()
+      .then((ics) => setIcs(ics))
+      .catch((error) => console.error("Error:", error));
+  }, []);
+
 
   function login() {
     if (username.trim() === "") {
@@ -87,6 +95,9 @@ function App() {
 
     setCurrentPage('/home');
 
+  }
+  
+  function handleFile(event) {
 
   }
 
@@ -143,7 +154,7 @@ function App() {
             </div>
             <p>Re-upload Calendar</p>
             {/* TODO: Update Database and Replace Calendar Entry */}
-            <input type="file" />
+            <input type="file" onChange={(e) => setIcs(e.target.value)}/>
           </div>
 
         )}

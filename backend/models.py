@@ -46,8 +46,67 @@ class UpdateUserModel(BaseModel):
     )
 
 
-class Assignment() :
+    class ICSFileModel(BaseModel):
+        """
+        Container for an uploaded ICS file.
+        """
+        file_content: str = Field(..., description="The content of the uploaded ICS file as a string.")
+        model_config = ConfigDict(
+            json_schema_extra={
+                "example": {
+                    "file_content": "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT\nEND:VCALENDAR",
+                }
+            },
+        )
 
 
+class Assignment(BaseModel):
+    """
+    Container for an assignment record.
+    """
+    DateAndTime: str
+    DueDate: str
+    Description: str
+    Title: str
+    CourseNum: str
+    URL: str
+    exam: bool
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "DateAndTime": "2023-10-01T10:00:00",
+                "DueDate": "2023-10-15",
+                "Description": "Complete the project report.",
+                "Title": "Project Report",
+                "CourseNum": "CS101",
+                "URL": "http://example.com/assignment",
+                "exam": False,
+            }
+        },
+    )
 
-class UpdateAssignment():
+
+class UpdateAssignment(BaseModel):
+    """
+    Container for updating an assignment record.
+    """
+    DateAndTime: Optional[str] = None
+    DueDate: Optional[str] = None
+    Description: Optional[str] = None
+    Title: Optional[str] = None
+    CourseNum: Optional[str] = None
+    URL: Optional[str] = None
+    exam: Optional[bool] = None
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "DateAndTime": "2023-10-01T10:00:00",
+                "DueDate": "2023-10-15",
+                "Description": "Update the project report details.",
+                "Title": "Updated Project Report",
+                "CourseNum": "CS101",
+                "URL": "http://example.com/updated-assignment",
+                "exam": True,
+            }
+        },
+    )
