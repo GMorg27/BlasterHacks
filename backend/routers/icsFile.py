@@ -3,21 +3,21 @@ from fastapi import APIRouter, Body, status
 import motor.motor_asyncio
 from pydantic import BaseModel
 
-from models import ICSModel
+from models import ICSFileModel
 
 router = APIRouter(prefix="/icsFiles")
 
 client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URL"])
 db = client.get_database("blasterhacks")
-ics_collection = db.get_collection["icsFiles"]  # Ensure the collection name reflects ICS storage
+ics_collection = db.get_collection("icsFiles")  # Ensure the collection name reflects ICS storage
 
 class icsCollection(BaseModel):
-    users: list[ICSModel]
+    users: list[ICSFileModel]
 
 @router.get(
     "/",
     response_description="List all ICS files",
-    response_model=list[ICSModel],
+    response_model=list[ICSFileModel],
     response_model_by_alias=False,
 )
 async def list_ics_files():
@@ -35,7 +35,7 @@ async def list_ics_files():
     response_description="Upload raw ICS file",
     status_code=status.HTTP_201_CREATED,
 )
-async def upload_ics_file(ics_data: ICSModel = Body(..., media_type="application/json")):
+async def upload_ics_file(ics_data: ICSFileModel = Body(..., media_type="application/json")):
     """
     Accepts a raw ICS file string and stores it in MongoDB.
     """

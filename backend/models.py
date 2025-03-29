@@ -46,21 +46,21 @@ class UpdateUserModel(BaseModel):
     )
 
 
-    class ICSFileModel(BaseModel):
-        """
-        Container for an uploaded ICS file.
-        """
-        file_content: str = Field(..., description="The content of the uploaded ICS file as a string.")
-        model_config = ConfigDict(
-            json_schema_extra={
-                "example": {
-                    "file_content": "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT\nEND:VCALENDAR",
-                }
-            },
-        )
+class ICSFileModel(BaseModel):
+    """
+    Container for an uploaded ICS file.
+    """
+    file_content: str = Field(..., description="The content of the uploaded ICS file as a string.")
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "file_content": "BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Meeting\nEND:VEVENT\nEND:VCALENDAR",
+            }
+        },
+    )
 
 
-class Assignment(BaseModel):
+class AssignmentModel(BaseModel):
     """
     Container for an assignment record.
     """
