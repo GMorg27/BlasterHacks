@@ -40,6 +40,10 @@ button:hover {
     margin: 10px;
 }
 
+.fullWidth {
+    width: 100%;
+}
+
 .container {
     display: flex;
     justify-content: center;
@@ -62,6 +66,7 @@ button:hover {
 
 .card {
     height: 100px;
+    width: 500px;
     border-radius: 5px;
     margin: 5px;
     padding: 5px;
@@ -72,6 +77,13 @@ button:hover {
 
 #assignment-list {
     height: 60vh;
+}
+
+#friends-list {
+    height: 6em;
+    border-radius: 5px;
+    background-color: white;
+    text-align: left;
 }
 
 #title {

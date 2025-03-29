@@ -40,6 +40,7 @@ class UserModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: str = Field(...)
     tasks: list[AssignmentModel] = Field(...)
+    friends: list[str] = Field()
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
@@ -47,6 +48,7 @@ class UserModel(BaseModel):
             "example": {
                 "name": "Jane Doe",
                 "tasks": [],
+                "friends": [],
             }
         },
     )
@@ -58,6 +60,7 @@ class UpdateUserModel(BaseModel):
     """
     name: Optional[str] = None
     tasks: list[AssignmentModel] = None
+    friends: list[str] = None
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
@@ -82,3 +85,4 @@ class ICSFileModel(BaseModel):
             }
         },
     )
+    

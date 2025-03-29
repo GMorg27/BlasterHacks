@@ -1,13 +1,15 @@
 import './styles.css';
 
 import { useEffect, useState } from "react";
-import { createNewUser, getAllUsers } from './accessors/userAccessor.js';
+import { createNewUser, getAllUsers, getUserFriends, addFriendship } from './accessors/userAccessor.js';
 import { User } from "./models/user.ts";
 import { getUserAssignments, uploadICSString } from './accessors/assignmentAccessor.js';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(window.location.pathname); // Track the current page
   const [username, setUsername] = useState("");
+  const [friendname, setFriendname] = useState("");
+  const [allFriends, setAllFriends] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   // const [ics, setIcs] = useState([]);
   const [assignments, setAllAssignments] = useState([]);
@@ -26,8 +28,12 @@ function App() {
       const loggedInUsername = localStorage.getItem("username");
       if (loggedInUsername) {
         getUserAssignments(loggedInUsername)
-          .then((assignments) => setAllAssignments(assignments))
-          .catch((error) => console.error("Error:", error));
+        .then((assignments) => setAllAssignments(assignments))
+        .catch((error) => console.error("Error:", error));
+
+        getUserFriends(loggedInUsername)
+        .then((allFriends) => setAllFriends(allFriends))
+        .catch((error) => console.error("Error:", error));
       }
     }
   }, [currentPage]); // This will run every time currentPage change
@@ -105,9 +111,10 @@ function App() {
 
     const reader = new FileReader();
     reader.onload = function(event) {
-      uploadICSString(event.target.result, localStorage.getItem("username"))
+      const name = localStorage.getItem("username")
+      uploadICSString(event.target.result, name)
       .then((data) => {
-        getUserAssignments(username)
+        getUserAssignments(name)
         .then((assignments) => setAllAssignments(assignments))
         .catch((error) => console.error("Error:", error));
       })
@@ -117,11 +124,41 @@ function App() {
     reader.readAsText(file);
   }
 
+  function addFriendPressed() {
+    if (friendname === "") return;
+
+    if (friendname === localStorage.getItem("username")) {
+      alert("That's you, silly.");
+      return;
+    }
+
+    for (let friend of allFriends) {
+      if (friend.name === friendname) {
+        alert(friendname + " is already your friend!");
+        return;
+      }
+    }
+
+    for (let user of allUsers) {
+      if (user.name === friendname) {
+        addFriendship(localStorage.getItem("username"), friendname)
+        .then((data) => {
+          setAllFriends((prevFriends) => {
+            const updatedFriends = [...prevFriends, user];
+            return updatedFriends;
+          });
+        })
+        .catch((error) => console.error("Error:", error));
+        return;
+      }
+    }
+
+    alert("User " + friendname + " not found!");
+  }
+
 
   return (
     <div>
-      <script src="https://kit.fontawesome.com/04231664ea.js" crossorigin="anonymous"></script>
-      
       {currentPage === '/' && (
         <div className="module">
           <h1>BlasterHacks 2025</h1>
@@ -176,17 +213,26 @@ function App() {
           <div className="module">
             <h2>Friends</h2>
             <div>
-              <label style={{ marginRight: "5px" }} htmlFor="friendname">Add Friend</label>
               <input
                 type="text"
                 id="friendname"
                 name="friendname"
-                // value={username}
-                // onChange={(e) => setUsername(e.target.value)}
+                value={friendname}
+                onChange={(e) => setFriendname(e.target.value)}
               />
             </div>
-
-            
+            <div style={{marginTop: "5px", marginBottom: "25px"}}>
+              <button onClick={addFriendPressed}>Add Friend</button>
+            </div>
+            <div className="scrollable" id="friends-list">
+              <ul style={{width: "100%"}}>
+                {allFriends.map((friend, index) => (
+                  <div key={index} style={index % 2 === 0 ? {backgroundColor: "white"} : {backgroundColor : "#F7EEDE"}}>
+                    <p>{friend.name}</p>
+                  </div>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       )}
