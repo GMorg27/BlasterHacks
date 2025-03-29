@@ -2,6 +2,7 @@ import './App.css';
 
 import { useEffect, useState } from "react";
 
+import { createNewUser, getAllUsers } from './accessors/userAccessor.js';
 import { User } from "./models/user.ts";
 
 /**
@@ -12,19 +13,8 @@ function App() {
   const [allUsers, setAllUsers] = useState([]);
 
   useEffect(() => { // Only execute once when the page is opened
-    // GET request to retrieve all user data
-    fetch("http://localhost:8000/users", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      }
-    })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Success:", data);
-      const users = data.map(userData => new User(userData.name));
-      setAllUsers(users);
-    })
+    getAllUsers()
+    .then((users) => setAllUsers(users))
     .catch((error) => console.error("Error:", error));
   }, []);
 
@@ -51,18 +41,7 @@ function App() {
     }
 
     const user = new User(username);
-    console.log(JSON.stringify(user));
-
-    fetch("http://localhost:8000/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
-    })
-    .then((response) => response.json())
-    .then((data) => console.log("Success:", data))
-    .catch((error) => console.error("Error:", error));
+    createNewUser(user);
   }
 
   return (
