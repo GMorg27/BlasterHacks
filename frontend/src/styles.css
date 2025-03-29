@@ -4,6 +4,16 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #F7EEDE;
+    color: #26272C;
+}
+
+h1 {
+    margin: 10px;
+}
+
+h2 {
+    margin: 5px;
 }
 
 p, ul {
@@ -11,15 +21,43 @@ p, ul {
     padding: 0;
 }
 
-.module {
+button {
+    background-color: white;
+    border: 2px solid #E4113F;
     border-radius: 5px;
     padding: 10px;
-    background-color: blue;
+}
+
+button:hover {
+    background-color: #E4113F;
+}
+
+.margin-lg {
+    margin: 25px;
+}
+
+.margin-sm {
+    margin: 10px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2vw;
+}
+
+.module {
+    border-radius: 10px;
+    margin: 2vw;
+    padding: 25px;
+    background-color: #1FA2FF;
     text-align: center;
 }
 
 .scrollable {
     overflow-y: auto;
+    display: flex;
 }
 
 .card {
@@ -27,12 +65,13 @@ p, ul {
     border-radius: 5px;
     margin: 5px;
     padding: 5px;
-    background-color: whitesmoke;
+    background-color: white;
+    border: 2px solid #E4113F;
     text-align: left;
 }
 
 #assignment-list {
-    height: 50vh;
+    height: 60vh;
 }
 
 #title {

@@ -15,13 +15,14 @@ function App() {
   // Fetch the user list when the page loads
   useEffect(() => {
     getAllUsers()
-      .then((users) => setAllUsers(users))
-      .catch((error) => console.error("Error:", error));
+    .then((users) => setAllUsers(users))
+    .catch((error) => console.error("Error:", error));
   }, []); // Empty dependency array means this will run only once, when the page first loads.
 
   // Fetch assignments whenever currentPage changes to '/home'
   useEffect(() => {
     if (currentPage === '/home') {
+      setAllAssignments([]);
       const loggedInUsername = localStorage.getItem("username");
       if (loggedInUsername) {
         getUserAssignments(loggedInUsername)
@@ -31,7 +32,7 @@ function App() {
     }
   }, [currentPage]); // This will run every time currentPage change
 
-  function login() {
+  function loginPressed() {
     if (username.trim() === "") {
       alert("Please enter a username to log in.");
       return;
@@ -39,31 +40,45 @@ function App() {
 
     for (let user of allUsers) {
       if (user.name === username) {
-        console.log("Logging in as:", username);
-        localStorage.setItem("username", username); // Store the username in local storage
-
-        // Redirect to home page
-        window.history.pushState({}, '', '/home');
-        setCurrentPage('/home');
-
+        login(username);
         return;
       }
     }
     alert("User " + username + " not found.");
   }
 
-  function signUp() {
+  function signUpPressed() {
     if (username.trim() === "") {
       alert("Please enter a username to sign up.");
       return;
     }
 
+    for (let user of allUsers) {
+      if (user.name === username) {
+        alert("Username " + username + " already taken.")
+        return;
+      }
+    }
+
     const user = new User(username);
     createNewUser(user)
+    .then((data) => {
+      getAllUsers()
+      .then((users) => setAllUsers(users))
+      .catch((error) => console.error("Error:", error));
+      login(username)
+    })
     .catch((error) => console.error("Error:", error));
+    
+  }
 
-    //TODO: Navigate user to log in or prompt the user to log in with new account
-    //TODO: If new user, navigate to a new user page 
+  function login(username) {
+    console.log("Logging in as:", username);
+    localStorage.setItem("username", username); // Store the username in local storage
+
+    // Redirect to home page
+    window.history.pushState({}, '', '/home');
+    setCurrentPage('/home');
   }
 
   function logout() {
@@ -71,6 +86,7 @@ function App() {
     setCurrentPage('/');
     console.log("Logging out of", username);
     localStorage.removeItem("username");
+    setAllAssignments([]);
   }
 
   function Settings() {
@@ -104,13 +120,15 @@ function App() {
 
   return (
     <div>
+      <script src="https://kit.fontawesome.com/04231664ea.js" crossorigin="anonymous"></script>
+      
       {currentPage === '/' && (
         <div className="module">
           <h1>BlasterHacks 2025</h1>
 
-          <div id="sign-in">
+          <div className="margin-lg">
             <div>
-              <label htmlFor="username">Username</label>
+              <label style={{ marginRight: "5px" }} htmlFor="username">Username</label>
               <input
                 type="text"
                 id="username"
@@ -120,33 +138,55 @@ function App() {
               />
             </div>
 
-            <div>
-              <button onClick={login}>Login</button>
-              <button onClick={signUp}>Sign Up</button>
+            <div className="margin-lg">
+              <button style={{ marginRight: "10px" }} onClick={loginPressed}>Login</button>
+              <button onClick={signUpPressed}>Sign Up</button>
             </div>
           </div>
         </div>
       )}
 
       {currentPage === '/home' && (
-        <div className="module">
-          <div>
+        <div className="container">
+          <div className="module">
             <h1>Welcome, {localStorage.getItem("username")}!</h1>
-            <button onClick={Settings}>Settings and Preferences</button>
-            <button onClick={logout}>Logout</button>
-          </div>
-          <input type="file" onChange={(e) => uploadICSFile(e)}/>
+            
+            <div className="margin-lg">
+              <button onClick={Settings} style={{ marginRight: "10px" }}>Settings</button>
+              <button onClick={logout}>Logout</button>
+            </div>
+            <input className="file-upload" type="file" onChange={(e) => uploadICSFile(e)}/>
 
-          <div className="scrollable" id="assignment-list">
-            <ul>
-              {assignments.map((assignment, index) => (
-                <div className="card" key={index}>
-                  <p id="title">{assignment.title}</p>
-                  <p id="date">Due: {assignment.dueDate}</p>
-                  <p id="desc">{assignment.description}</p>
-                </div>
-              ))}
-            </ul>
+            <div style={{ textAlign: "left" }}><h2>Tasks</h2></div>
+            <div className="scrollable" id="assignment-list">
+              <ul>
+                {assignments.length === 0 ? 
+                <p>No assignments left! Good job :)</p>
+                : assignments.map((assignment, index) => (
+                  <div className="card" key={index}>
+                    <p id="title">{assignment.title}</p>
+                    <p id="date">Due: {assignment.dueDate}</p>
+                    <p id="desc">{assignment.description}</p>
+                  </div>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="module">
+            <h2>Friends</h2>
+            <div>
+              <label style={{ marginRight: "5px" }} htmlFor="friendname">Add Friend</label>
+              <input
+                type="text"
+                id="friendname"
+                name="friendname"
+                // value={username}
+                // onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+
+            
           </div>
         </div>
       )}
@@ -159,8 +199,7 @@ function App() {
             <button onClick={goHome}>Home</button>
           </div>
           <p>Re-upload Calendar</p>
-          {/* TODO: Update Database and Replace Calendar Entry */}
-          <input type="file" onChange={(e) => uploadICSFile(e)}/>
+          <input className="file-upload" type="file" onChange={(e) => uploadICSFile(e)}/>
         </div>
       )}
     </div>
