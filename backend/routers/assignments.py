@@ -70,7 +70,7 @@ async def parse_ICS(icsString: str) -> list[AssignmentModel]:
             attr = line[:splitLoc]
             value = line[splitLoc+1:]
             courseNum = ""
-            if attr == "DSTART":
+            if attr == "DTSTART":
                 assignment["dueDate"] = value
             elif attr == "DESCRIPTION":
                 assignment["description"]  = value
