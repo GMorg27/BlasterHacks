@@ -14,9 +14,10 @@ class AssignmentModel(BaseModel):
     """
     Container for an assignment record.
     """
+    title: str
     dueDate: str | None = None
     description: str | None = None
-    title: str
+    courseNum: str | None = None
     URL: str
     model_config = ConfigDict(
         json_schema_extra={
