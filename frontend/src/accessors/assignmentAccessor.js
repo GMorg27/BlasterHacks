@@ -2,7 +2,6 @@
 export async function getUserAssignments(username) {
     const queryParam = "?username=" + username;
     const URL = "http://localhost:8000/assignments/" + queryParam;
-    const isCompleted = false; 
     try {
         const response = await fetch(URL, {
             method: "GET",
@@ -24,23 +23,21 @@ export async function getUserAssignments(username) {
     }
 }
 
-export async function updatedAssignments(username, assignment) { 
-    
+// POST request to update assignments for a user
+export async function updateAssignments(username, assignments) { 
     const queryParam = "?username=" + username;
-
-    const URL = "http://localhost:8000/assignments/upload" + queryParam;    
-
+    const URL = "http://localhost:8000/assignments/update" + queryParam;    
     try {
         const response = await fetch(URL, {
             method: "POST",
             headers: {
             "Content-Type": "application/json",
             },
-            body: JSON.stringify(assignment)
+            body: JSON.stringify(assignments)
         });
         
         if (!response.ok) {
-            throw new Error("Failed to upload assignment string");
+            throw new Error("Failed to update assignments for " + username);
         }
     
         const data = await response.json();

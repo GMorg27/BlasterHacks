@@ -123,7 +123,7 @@ export async function addFriendship(username1, username2) {
 
 // POST request to send a notification to the user
 export async function sendNotification(username, notification) {
-    const URL = "http://localhost:8000/users/notifications";
+    const URL = "http://localhost:8000/users/notifications?username=" + username;
     try {
         const response = await fetch(URL, {
             method: "POST",

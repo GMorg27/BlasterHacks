@@ -13,7 +13,7 @@ h1 {
 }
 
 h2 {
-    margin: 5px;
+    margin: 3px;
 }
 
 h3 {
@@ -89,15 +89,41 @@ button:hover {
     text-align: left;
 }
 
+.overlay {
+    position: relative;
+}
+  
+.overlay::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 255, 0, 0.4);
+    pointer-events: none; /* Makes sure the overlay doesn't block any interactions */
+}
+
 .card-sm {
-    height: 50px;
-    width: 200px;
+    height: 75px;
+    width: 300px;
     border-radius: 5px;
     margin: 5px;
     padding: 5px;
     background-color: white;
     border: 2px solid #E4113F;
     text-align: left;
+}
+
+.column-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
 }
 
 #assignment-list {
@@ -111,15 +137,19 @@ button:hover {
     text-align: left;
 }
 
-#title {
-    font-weight: bold;
-    margin-bottom: 10px;
+#notifs-list {
+    height: 30vh;
 }
 
-#date {
+#title {
+    font-weight: bold;
     margin-bottom: 5px;
 }
 
+#date {
+    margin-bottom: 2px;
+}
+
 #desc {
-    font-size: 0.8em;
+    font-size: 0.7em;
 }

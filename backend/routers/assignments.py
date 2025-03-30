@@ -20,19 +20,6 @@ class UserCollection(BaseModel):
     users: list[UserModel]
 
 
-@router.post() (
-    "/update",
-    response_description="Update list of assignments from string",
-    response_model=list[AssignmentModel],
-    status_code=status.HTTP_201_CREATED,
-    response_model_by_alias=False,
-    
-)
-async def update_assignments(Assignment: AssignmentModel = Body(...) str = Query(...)): 
-    
-    
-
-
 @router.get(
     "/",
     response_description="Get all assignments for user",
@@ -48,6 +35,28 @@ async def get_user_assignments(username: str = Query(...)):
     if user is None:
         raise HTTPException(status_code=404, detail=f"User {username} not found")
 
+    return user["tasks"]
+
+@router.post(
+    "/update",
+    response_description="Update list of assignments from string",
+    response_model=list[AssignmentModel],
+    status_code=status.HTTP_201_CREATED,
+    response_model_by_alias=False,
+)
+async def update_assignments(assignments: list[AssignmentModel] = Body(...), username: str = Query(...)): 
+    """
+    POST request to update a the list of assignments for the given user.
+    """
+    user = await db.users.find_one({"name": username})
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User {username} not found")
+
+    db.users.update_one(
+        {"name": username},  
+        {"$set": {"tasks": [assignment.model_dump() for assignment in assignments]}}  
+    )
+    user = await db.users.find_one({"name": username})
     return user["tasks"]
 
 @router.post(

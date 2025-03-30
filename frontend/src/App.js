@@ -1,9 +1,10 @@
 import './styles.css';
 
 import { useEffect, useState } from "react";
-import { createNewUser, getAllUsers, getUserFriends, addFriendship, getUserNotifications } from './accessors/userAccessor.js';
+import { createNewUser, getAllUsers, getUserFriends, addFriendship, getUserNotifications, sendNotification } from './accessors/userAccessor.js';
 import { User } from "./models/user.ts";
-import { getUserAssignments, uploadICSString } from './accessors/assignmentAccessor.js';
+import { getUserAssignments, uploadICSString, updateAssignments } from './accessors/assignmentAccessor.js';
+import { Notification } from './models/notification.ts';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(window.location.pathname); // Track the current page
@@ -14,11 +15,11 @@ function App() {
   const [allNotifs, setAllNotifs] = useState([]);
   // const [ics, setIcs] = useState([]);
   const [assignments, setAllAssignments] = useState([]);
-  const [showCompleted, setShowCompleted] = useState(false);
+  // const [showCompleted, setShowCompleted] = useState(false);
 
-  let filteredAssignments = assignments.filter((assignment) => 
-    showCompleted ? assignment.isComplete : !assignment.isComplete
-  );
+  // let filteredAssignments = assignments.filter((assignment) => 
+  //   showCompleted ? assignment.isComplete : !assignment.isComplete
+  // );
 
   // Fetch the user list when the page loads
   useEffect(() => {
@@ -48,16 +49,16 @@ function App() {
     }
   }, [currentPage]);
 
-  const handleFilterChange = (event) => {
-    setShowCompleted(event.target.checked); // Update filter state
-  };
+  // const handleFilterChange = (event) => {
+  //   setShowCompleted(event.target.checked); // Update filter state
+  // };
 
-  const handleCompletionToggle = (index) => {
-    const updatedAssignments = assignments.map((assignment, i) =>
-      i === index ? { ...assignment, isComplete: !assignment.isComplete } : assignment
-    );
-    setAllAssignments(updatedAssignments);
-  };
+  // const handleCompletionToggle = (index) => {
+  //   const updateAssignments = assignments.map((assignment, i) =>
+  //     i === index ? { ...assignment, isComplete: !assignment.isComplete } : assignment
+  //   );
+  //   setAllAssignments(updateAssignments);
+  // };
 
 
   function loginPressed() {
@@ -140,8 +141,8 @@ function App() {
       uploadICSString(event.target.result, name)
         .then((data) => {
           getUserAssignments(name)
-            .then((assignments) => setAllAssignments(assignments))
-            .catch((error) => console.error("Error:", error));
+          .then((assignments) => setAllAssignments(assignments))
+          .catch((error) => console.error("Error:", error));
         })
         .catch((error) => console.error("Error:", error));
     };
@@ -181,12 +182,23 @@ function App() {
     alert("User " + friendname + " not found!");
   }
 
-  function completeAssignment(index ) {
-    assignments[index].isComplete = true;
-    
-    
-  }
+  function completeAssignment(index) {
+    let updatedAssignments = [...assignments];
+    updatedAssignments[index] = { ...updatedAssignments[index], isCompleted: true };
 
+    assignments[index].isCompleted = true;
+    updateAssignments(localStorage.getItem("username"), assignments)
+    .then((allAssignments) => {
+      setAllAssignments(updatedAssignments);
+
+      const notif = new Notification(localStorage.getItem("username"), assignments[index].title);
+      for (let friend of allFriends) {
+        sendNotification(friend.name, notif)
+        .catch((error) => console.error("Error:", error));
+      }
+    })
+    .catch((error) => console.error("Error:", error));
+  }
 
   return (
     <div>
@@ -228,14 +240,24 @@ function App() {
             <div style={{ textAlign: "left" }}><h2>Tasks</h2></div>
             <div className="scrollable" id="assignment-list">
               <ul>
-                {filteredAssignments.length === 0 ? (
+                {assignments.length === 0 ? (
                   <li>No assignments left! Good job</li>) : (
-                  filteredAssignments.map((assignment, index) => (
-                    <li className="card" key={index}>
-                      <p id="title">{assignment.title}</p> 
-                      <button onClick={completeAssignment(index) }> </button>
-                      <p id="date">Due: {assignment.dueDate}</p>
-                      <p id="desc">{assignment.description}</p>    
+                    assignments.map((assignment, index) => (
+                    <li className={assignment.isCompleted ? 'card overlay' : 'card'} key={index}>
+                      <div className="column-container">
+                        <div className="column">
+                          <p id="title">{assignment.title}</p>
+                          <p id="date">Due: {assignment.dueDate}</p>
+                          <p id="desc">{assignment.description}</p>
+                        </div>
+                        {assignment.isCompleted ? null :
+                          <button
+                            onClick={() => completeAssignment(index)}
+                            style={{marginLeft : "5px"}}
+                          >
+                            Done
+                          </button>}
+                      </div>
                     </li>
                   ))
                 )}
@@ -261,7 +283,7 @@ function App() {
               <ul style={{width: "100%"}}>
                 {allFriends.map((friend, index) => (
                   <div key={index} style={index % 2 === 0 ? {backgroundColor: "white"} : {backgroundColor : "#F7EEDE"}}>
-                    <p>{friend.name}</p>
+                    <p style={{margin: "2px"}}>{friend.name}</p>
                   </div>
                 ))}
               </ul>
