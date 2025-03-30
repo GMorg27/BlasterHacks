@@ -268,11 +268,11 @@ function App() {
               </ul>
             </div>
 
-            <div style={{ textAlign: "left" }}><h3>Friend Activity</h3></div>
+            <div style={{ textAlign: "left", marginTop: "10px" }}><h3>Friend Activity</h3></div>
             <div className="scrollable" id="notifs-list">
               <ul>
                 {allNotifs.map((notif, index) => (
-                  <div key={index}>
+                  <div className="card-sm" key={index}>
                     <p>{notif.friendName} completed {notif.title}</p>
                   </div>
                 ))}

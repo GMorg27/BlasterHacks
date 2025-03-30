@@ -29,7 +29,7 @@ class UserCollection(BaseModel):
 )
 async def get_user_assignments(username: str = Query(...)):
     """
-    POST request to upload a list of assignments from a file for the given user.
+    GET request to upload a list of assignments from a file for the given user.
     """
     user = await db.users.find_one({"name": username})
     if user is None:
