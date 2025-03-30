@@ -99,7 +99,10 @@ async def parse_ICS(icsString: str) -> list[AssignmentModel]:
     for event in events:
         # Extract due date
         assignment_due = re.search(r"DTSTART;.*:(\d+)", event)
-        assignment["dueDate"] = assignment_due.group(1) if assignment_due else None
+        year = assignment_due.group(1)[0:4] if assignment_due else None
+        month = assignment_due.group(1)[4:6] if assignment_due else None
+        day = assignment_due.group(1)[6:8] if assignment_due else None
+        assignment["dueDate"] = f"{month}/{day}/{year}"
 
         # Extract summary (title)
         assignment_title = re.search(r"SUMMARY:(.+)", event)
