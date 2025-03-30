@@ -3,6 +3,8 @@ import './styles.css';
 import { ReactComponent as StarIcon } from './assets/star.svg';
 import data from './assets/Dizzy.png';
 import { useEffect, useState } from "react";
+import Slider from '@mui/material/Slider';
+
 
 import { createNewUser, getAllUsers, getUserFriends, addFriendship, getUserNotifications, sendNotification, getStarCount, giveStar, updateNotifications } from './accessors/userAccessor.js';
 import { User } from "./models/user.ts";
@@ -20,31 +22,48 @@ function App() {
   const [stars, setStars] = useState(0);
   const [starDisplay, setStarDisplay] = useState([]);
   const [progress, setProgress] = useState(0);
-  
+
+  const [value, setValue] = useState(30);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   const boxWidth = 150;
   const boxHeight = 125;
   const starSize = 25;
 
 
-  const handleSend = () => {
+  const handleNotif = () => {
     if (!("Notification" in window)) {
       alert("Not Supported")
       return
     }
-
+    let nextAssignment = null;
+    let nextUrl = ""; // Default to the first assignment URL
     Notification.requestPermission().then(permission => {
       if (permission === "granted") {
-        const notification = new Notification("BlasterHacks 2025", {
-          body: "Hackathon Notification!!",
-          icon: data // Replace with your icon URL
-        });
-        notification.onclick = () => {
-          window.open("https://blasterhacks.com", "_blank")
+        for (let i = 0; i < assignments.length; i++) {
+          if (!assignments[i].isCompleted) {  // Find first incomplete assignment
+            nextAssignment = assignments[i];
+            nextUrl = assignments[i].URL;
+            console.log("Next assignment URL:", nextUrl);
+            break;
+          }
         }
 
-      }
-    })
+        if (nextAssignment) {
+          const notification = new Notification("Starbox", {
+            body: "Start your next assignment now: " + nextAssignment.title,
+            icon: data // Replace with your icon URL
+          });
 
+          notification.onclick = () => {
+            window.open(nextUrl, "_blank");
+          };
+        }
+      }
+    });
   }
 
 
@@ -56,6 +75,14 @@ function App() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleNotif();
+    }, (value * 1000)+10000); // Call handleSend every second
+    console.log("Interval set to:", (value * 1000)+10000, "ms");
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, [handleNotif, value]);
 
   // Fetch the user list when the page loads
   useEffect(() => {
@@ -128,6 +155,8 @@ function App() {
     alert("User " + username + " not found.");
   }
 
+  
+
   function signUpPressed() {
     if (username.trim() === "") {
       alert("Please enter a username to sign up.");
@@ -179,6 +208,7 @@ function App() {
   function Settings() {
     window.history.pushState({}, '', '/settings');
     setCurrentPage('/settings');
+    
   }
 
   function goHome() {
@@ -225,7 +255,7 @@ function App() {
         const updatedFriends = [...allFriends, user];
         setAllFriends(updatedFriends);
         addFriendship(localStorage.getItem("username"), friendname)
-        .catch((error) => console.error("Error:", error));
+          .catch((error) => console.error("Error:", error));
         return;
       }
     }
@@ -249,6 +279,8 @@ function App() {
       .catch((error) => console.error("Error:", error));
   }
 
+
+
   function giveStarPressed(notifIndex) {
     let updatedNotifs = [...allNotifs];
     const notif = updatedNotifs[notifIndex];
@@ -269,7 +301,7 @@ function App() {
         <div className="module">
           <h1 id="splash-title">StarBox</h1>
           <div id="splash-box">
-            <StarIcon width={100} height={100}/>
+            <StarIcon width={100} height={100} />
             <h3 id="splash-overlay">A social motivational tool</h3>
           </div>
 
@@ -298,10 +330,10 @@ function App() {
           <div className="module">
 
             <h1>Welcome, {localStorage.getItem("username")}!</h1>
-
+            
             <div className="margin-lg">
 
-              <button onClick={handleSend}>Send Notification</button>
+              {/* <button onClick={handleSend}>Send Notification</button> */}
               <button onClick={Settings} style={{ marginRight: "10px" }}>Settings</button>
               <button onClick={logout}>Logout</button>
             </div>
@@ -388,7 +420,7 @@ function App() {
               </div>
             </div>
 
-            <div class="column-container" style={ {alignItems: "center"} }>
+            <div class="column-container" style={{ alignItems: "center" }}>
               <div
                 style={{
                   width: boxWidth,
@@ -423,7 +455,8 @@ function App() {
           <div>
             <h1>Settings</h1>
             <p>This is the settings page.</p>
-            <button onClick={goHome}>Home</button>
+            <button onClick={goHome}>Home</button>   
+            <Slider aria-label="ReminderIntervals" value={value} onChange={handleChange} />         
           </div>
           <p>Re-upload Calendar</p>
           <input className="file-upload" type="file" onChange={(e) => uploadICSFile(e)} />

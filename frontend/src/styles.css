@@ -61,6 +61,7 @@ button:hover {
     padding: 25px;
     background-color: #1FA2FF;
     text-align: center;
+    text-overflow: ellipsis;    
 }
 
 .scrollable {
