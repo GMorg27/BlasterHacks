@@ -195,13 +195,9 @@ function App() {
 
     for (let user of allUsers) {
       if (user.name === friendname) {
+        const updatedFriends = [...allFriends, user];
+        setAllFriends(updatedFriends);
         addFriendship(localStorage.getItem("username"), friendname)
-        .then((data) => {
-          setAllFriends((prevFriends) => {
-            const updatedFriends = [...prevFriends, user];
-            return updatedFriends;
-          });
-        })
         .catch((error) => console.error("Error:", error));
         return;
       }
@@ -284,7 +280,7 @@ function App() {
             <div style={{ textAlign: "left" }}><h2>Tasks</h2></div>
             <div className="progress-outer">
               <div class="progress-inner" style={{ width: `${progress}%` }}></div>
-              <p class="progress-indicator">{progress}%</p>
+              <p class="text-overlay">{progress}%</p>
             </div>
             <div className="scrollable" id="assignment-list">
               <ul>
@@ -363,7 +359,6 @@ function App() {
             </div>
 
             <div class="column-container" style={ {alignItems: "center"} }>
-              <h2>{stars}</h2>
               <div
                 style={{
                   width: boxWidth,
@@ -386,6 +381,7 @@ function App() {
                     }}
                   />
                 ))}
+                <h1 class="text-overlay">{stars}</h1>
               </div>
             </div>
           </div>
