@@ -28,7 +28,7 @@ class UserCollection(BaseModel):
     response_model_by_alias=False,
     
 )
-async def update_assignments(Assignment: AssignmentModel = Body(...): str = Query(...) ): 
+async def update_assignments(Assignment: AssignmentModel = Body(...) str = Query(...)): 
     
     
 
