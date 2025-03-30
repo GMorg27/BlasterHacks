@@ -126,6 +126,32 @@ button:hover {
     flex-direction: column;
 }
 
+.progress-outer {
+    width: 100%;
+    height: 25px;
+    background-color: #E4113F;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.progress-inner {
+    background-color: lime;
+    position: relative;
+    height: 25px;
+}
+
+.progress-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centers the text */
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
 #assignment-list {
     height: 50vh;
 }
@@ -156,4 +182,24 @@ button:hover {
 
 #friends-column {
     align-items: center;
+}
+
+#splash-title {
+    font-size: 4em;
+}
+
+#splash-box {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+#splash-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
 }
