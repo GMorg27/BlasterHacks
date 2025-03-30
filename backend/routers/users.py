@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 import motor.motor_asyncio
 
-from models import UserModel
+from models import UserModel, NotificationModel
 
 router = APIRouter(prefix="/users")
 
@@ -54,6 +54,21 @@ async def get_user_friends(username: str = Query(...)):
     
     return friends
 
+@router.get(
+    "/notifications",
+    response_description="Get all notifications for the user",
+    response_model=list[NotificationModel],
+    response_model_by_alias=False,
+)
+async def get_user_notifications(username: str = Query(...)):
+    """
+    GET a list of all pending notifications for the user.
+    """
+    user = await db.users.find_one({"name": username})
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User {username} not found")
+    
+    return user["notifications"]
 
 @router.post(
     "/",
@@ -109,4 +124,26 @@ async def add_friend(firstUser: str = Query(...), secondUser: str = Query(...)):
     await db.users.update_one(
         {"name": secondUser},  
         {"$set": {"friends": list(secondFriends)}}  
+    )
+
+@router.post(
+    "/notifications",
+    response_description="Send a notification to a user",
+    response_model=None,
+    status_code=status.HTTP_201_CREATED,
+    response_model_by_alias=False,
+)
+async def send_notification(notification: NotificationModel = Body(...), username: str = Query(...)):
+    """
+    POST request to send a notification to a user.
+    """
+    user = await db.users.find_one({"name": username})
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User {username} not found")
+    
+    notifs = user["notifications"]
+    notifs.append(notification.model_dump())
+    await db.users.update_one(
+        {"name": username},  
+        {"$set": {"notifications": notifs}}  
     )

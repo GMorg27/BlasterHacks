@@ -5,7 +5,7 @@ from routers import assignments, users
 
 app = FastAPI(
     title="BlasterHacks",
-    summary="Using FastAPI to add a ReST API to a MongoDB collection.",
+    summary="Using FastAPI to add a REST API to a MongoDB collection.",
 )
 app.add_middleware(
     CORSMiddleware,

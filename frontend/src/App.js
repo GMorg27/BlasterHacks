@@ -1,7 +1,7 @@
 import './styles.css';
 
 import { useEffect, useState } from "react";
-import { createNewUser, getAllUsers, getUserFriends, addFriendship } from './accessors/userAccessor.js';
+import { createNewUser, getAllUsers, getUserFriends, addFriendship, getUserNotifications } from './accessors/userAccessor.js';
 import { User } from "./models/user.ts";
 import { getUserAssignments, uploadICSString } from './accessors/assignmentAccessor.js';
 
@@ -11,11 +11,14 @@ function App() {
   const [friendname, setFriendname] = useState("");
   const [allFriends, setAllFriends] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [allNotifs, setAllNotifs] = useState([]);
   // const [ics, setIcs] = useState([]);
   const [assignments, setAllAssignments] = useState([]);
   const [showCompleted, setShowCompleted] = useState(false);
 
-
+  let filteredAssignments = assignments.filter((assignment) => 
+    showCompleted ? assignment.isComplete : !assignment.isComplete
+  );
 
   // Fetch the user list when the page loads
   useEffect(() => {
@@ -37,6 +40,10 @@ function App() {
         getUserFriends(loggedInUsername)
         .then((allFriends) => setAllFriends(allFriends))
         .catch((error) => console.error("Error:", error));
+
+        getUserNotifications(loggedInUsername)
+        .then((allNotifs) => setAllNotifs(allNotifs))
+        .catch((error) => console.error("Error:", error));
       }
     }
   }, [currentPage]);
@@ -44,10 +51,6 @@ function App() {
   const handleFilterChange = (event) => {
     setShowCompleted(event.target.checked); // Update filter state
   };
-
-  const filteredAssignments = assignments.filter((assignment) => 
-    showCompleted ? assignment.isComplete : !assignment.isComplete
-  );
 
   const handleCompletionToggle = (index) => {
     const updatedAssignments = assignments.map((assignment, i) =>
@@ -112,6 +115,9 @@ function App() {
     console.log("Logging out of", username);
     localStorage.removeItem("username");
     setAllAssignments([]);
+    setAllFriends([]);
+    setUsername([]);
+    setFriendname([]);
   }
 
   function Settings() {
@@ -217,7 +223,7 @@ function App() {
             <div className="scrollable" id="assignment-list">
               <ul>
                 {filteredAssignments.length === 0 ? (
-                  <li>No assignments left! Good job </li>) : (
+                  <li>No assignments left! Good job</li>) : (
                   filteredAssignments.map((assignment, index) => (
                     <li className="card" key={index}>
                       <p id="title">{assignment.title}</p>
@@ -257,6 +263,17 @@ function App() {
                 {allFriends.map((friend, index) => (
                   <div key={index} style={index % 2 === 0 ? {backgroundColor: "white"} : {backgroundColor : "#F7EEDE"}}>
                     <p>{friend.name}</p>
+                  </div>
+                ))}
+              </ul>
+            </div>
+
+            <div style={{ textAlign: "left" }}><h3>Friend Activity</h3></div>
+            <div className="scrollable" id="notifs-list">
+              <ul>
+                {allNotifs.map((notif, index) => (
+                  <div key={index}>
+                    <p>{notif.friendName} completed {notif.title}</p>
                   </div>
                 ))}
               </ul>
