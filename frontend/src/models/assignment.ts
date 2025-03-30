@@ -3,4 +3,5 @@ export class Assignment {
     description: string | null;
     title: string;
     URL: string;
+    isCompleted: boolean;
 }

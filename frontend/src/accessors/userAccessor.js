@@ -48,6 +48,31 @@ export async function getUserFriends(username) {
     }
 }
 
+// GET request to retrieve a list of notifications for the user
+export async function getUserNotifications(username) {
+    const queryParam = "?username=" + username;
+    const URL = "http://localhost:8000/users/notifications" + queryParam;
+    try {
+        const response = await fetch(URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to fetch notifications for " + username);
+        }
+
+        const data = await response.json();
+        console.log("Success:", data);
+        return data;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+
 // POST request to create a new user
 export async function createNewUser(user) {
     try {
@@ -85,6 +110,31 @@ export async function addFriendship(username1, username2) {
         
         if (!response.ok) {
             throw new Error("Failed to add friend");
+        }
+
+        const data = await response.json();
+        console.log("Success:", data);
+        return;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+
+// POST request to send a notification to the user
+export async function sendNotification(username, notification) {
+    const URL = "http://localhost:8000/users/notifications";
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(notification)
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to send notification to " + username);
         }
 
         const data = await response.json();
