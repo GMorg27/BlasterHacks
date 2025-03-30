@@ -86,7 +86,7 @@ async def parse_ICS(icsString: str) -> list[AssignmentModel]:
         # Extract description
         assignment_description = re.search(r"DESCRIPTION:(.+?)(?=\n[A-Z-]+:|$)", event, re.S)
         
-        assignment["description"] = ((assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")[:250])+"..." if len(assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")) > 250 else assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")) if assignment_description else None
+        assignment["description"] = ((assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")[:125])+"..." if len(assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")) > 125 else assignment_description.group(1).replace("\n", "").replace("\\n", "").replace("*", "").replace("\\", "").replace("\0", "")) if assignment_description else None
 
         # Extract course number (if present in brackets)
         course_match = re.search(r"SUMMARY:(.+)\[(.*?)\]", event) if event else None

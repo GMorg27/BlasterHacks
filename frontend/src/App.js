@@ -220,17 +220,10 @@ function App() {
                   <li>No assignments left! Good job </li>) : (
                   filteredAssignments.map((assignment, index) => (
                     <li className="card" key={index}>
-                      <p id="title">{assignment.title}</p>
+                      <p id="title">{assignment.title}</p> 
+                      
                       <p id="date">Due: {assignment.dueDate}</p>
-                      <p id="desc">{assignment.description}</p>
-                      <input
-                        type="checkbox"
-                        className= "Checkbox"
-                        id="completed"
-                        name="completed"
-                        checked={assignment.completed}
-                        onChange={() => handleCompletionToggle(index)}
-                      />
+                      <p id="desc">{assignment.description}</p>    
                     </li>
                   ))
                 )}
