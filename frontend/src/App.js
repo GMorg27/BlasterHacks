@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { createNewUser, getAllUsers, getUserFriends, addFriendship, getUserNotifications, sendNotification, getStarCount, giveStar, updateNotifications } from './accessors/userAccessor.js';
 import { User } from "./models/user.ts";
 import { getUserAssignments, uploadICSString, updateAssignments } from './accessors/assignmentAccessor.js';
-import { Notification } from './models/notification.ts';
+import { Activity } from './models/notification.ts';
 
 function App() {
   const [currentPage, setCurrentPage] = useState(window.location.pathname); // Track the current page
@@ -240,7 +240,7 @@ function App() {
 
     updateAssignments(localStorage.getItem("username"), updatedAssignments)
       .then((data) => {
-        const notif = new Notification(localStorage.getItem("username"), assignments[index].title);
+        const notif = new Activity(localStorage.getItem("username"), assignments[index].title);
         for (let friend of allFriends) {
           sendNotification(friend.name, notif)
             .catch((error) => console.error("Error:", error));

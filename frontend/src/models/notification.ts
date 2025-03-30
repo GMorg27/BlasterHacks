@@ -1,4 +1,4 @@
-export class Notification {
+export class Activity {
     friendName: string;
     title: string;
 
