@@ -19,6 +19,11 @@ function App() {
   const [assignments, setAllAssignments] = useState([]);
   const [stars, setStars] = useState(0);
   const [starDisplay, setStarDisplay] = useState([]);
+  const [progress, setProgress] = useState(0);
+  
+  const boxWidth = 150;
+  const boxHeight = 125;
+  const starSize = 25;
 
 
   const handleSend = () => {
@@ -42,9 +47,6 @@ function App() {
 
   }
 
-  const boxWidth = 200;
-  const boxHeight = 150;
-  const starSize = 30;
 
 
 
@@ -99,6 +101,17 @@ function App() {
       y: Math.random() * (boxHeight - starSize),
     })));
   }, [stars]);
+
+  // Update progress bar
+  useEffect(() => {
+    let completedCount = 0
+    for (let assignment of assignments) {
+      if (assignment.isCompleted)
+        completedCount++;
+    }
+    const newProgress = assignments.length === 0 ? 100 : Math.round(100.0 * completedCount / assignments.length);
+    setProgress(newProgress);
+  }, [assignments]);
 
   function loginPressed() {
     if (username.trim() === "") {
@@ -258,7 +271,11 @@ function App() {
     <div>
       {currentPage === '/' && (
         <div className="module">
-          <h1>BlasterHacks 2025</h1>
+          <h1 id="splash-title">StarBox</h1>
+          <div id="splash-box">
+            <StarIcon width={100} height={100}/>
+            <h3 id="splash-overlay">A social motivational tool</h3>
+          </div>
 
           <div className="margin-lg">
             <div>
@@ -295,6 +312,10 @@ function App() {
             <input className="file-upload" type="file" onChange={(e) => uploadICSFile(e)} />
 
             <div style={{ textAlign: "left" }}><h2>Tasks</h2></div>
+            <div className="progress-outer">
+              <div class="progress-inner" style={{ width: `${progress}%` }}></div>
+              <p class="progress-indicator">{progress}%</p>
+            </div>
             <div className="scrollable" id="assignment-list">
               <ul>
                 {assignments.length === 0 ? (
