@@ -363,7 +363,7 @@ function App() {
             </div>
 
             <div class="column-container" style={ {alignItems: "center"} }>
-              <h1>{stars}</h1>
+              <h2>{stars}</h2>
               <div
                 style={{
                   width: boxWidth,
