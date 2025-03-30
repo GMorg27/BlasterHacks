@@ -24,6 +24,34 @@ export async function getUserAssignments(username) {
     }
 }
 
+export async function updatedAssignments(username, assignment) { 
+    
+    const queryParam = "?username=" + username;
+
+    const URL = "http://localhost:8000/assignments/upload" + queryParam;    
+
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+            "Content-Type": "application/json",
+            },
+            body: JSON.stringify(assignment)
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to upload assignment string");
+        }
+    
+        const data = await response.json();
+        console.log("Success:", data);
+        return data;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+
 // POST request to send an ICS string to the backend for a user
 export async function uploadICSString(icsString, username) {
     const queryParam = "?username=" + username;

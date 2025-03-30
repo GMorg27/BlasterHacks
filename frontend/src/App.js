@@ -181,6 +181,12 @@ function App() {
     alert("User " + friendname + " not found!");
   }
 
+  function completeAssignment(index ) {
+    assignments[index].isComplete = true;
+    
+    
+  }
+
 
   return (
     <div>
@@ -227,7 +233,7 @@ function App() {
                   filteredAssignments.map((assignment, index) => (
                     <li className="card" key={index}>
                       <p id="title">{assignment.title}</p> 
-                      
+                      <button onClick={completeAssignment(index) }> </button>
                       <p id="date">Due: {assignment.dueDate}</p>
                       <p id="desc">{assignment.description}</p>    
                     </li>
