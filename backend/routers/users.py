@@ -70,6 +70,22 @@ async def get_user_notifications(username: str = Query(...)):
     
     return user["notifications"]
 
+@router.get(
+    "/stars",
+    response_description="Get the user's star count",
+    response_model=int,
+    response_model_by_alias=False,
+)
+async def get_user_notifications(username: str = Query(...)):
+    """
+    GET the user's star count.
+    """
+    user = await db.users.find_one({"name": username})
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User {username} not found")
+    
+    return user["stars"]
+
 @router.post(
     "/",
     response_description="Add new user",
@@ -147,3 +163,49 @@ async def send_notification(notification: NotificationModel = Body(...), usernam
         {"name": username},  
         {"$set": {"notifications": notifs}}  
     )
+
+@router.post(
+    "/notifications/update",
+    response_description="Update notifications for the user",
+    response_model=list[NotificationModel],
+    status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,
+)
+async def update_notifications(notifications: list[NotificationModel] = Body(...), username: str = Query(...)):
+    """
+    POST request to send a notification to a user.
+    """
+    user = await db.users.find_one({"name": username})
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User {username} not found")
+    
+    await db.users.update_one(
+        {"name": username},  
+        {"$set": {"notifications": [notification.model_dump() for notification in notifications]}}  
+    )
+    user = await db.users.find_one({"name": username})
+    return user["notifications"]
+
+@router.put(
+    "/stars",
+    response_description="Give a star to the user",
+    response_model=UserModel,
+    status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,
+)
+async def give_user_star(username: str = Query(...)):
+    """
+    PUT request to increase the star count of a user.
+    """
+    user = await db.users.find_one({"name": username})
+    if user is None:
+        raise HTTPException(status_code=404, detail=f"User {username} not found")
+    
+    stars = user["stars"]
+    stars += 1
+    await db.users.update_one(
+        {"name": username},  
+        {"$set": {"stars": stars}}  
+    )
+    user = await db.users.find_one({"name": username})
+    return user

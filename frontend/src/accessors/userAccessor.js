@@ -73,6 +73,30 @@ export async function getUserNotifications(username) {
     }
 }
 
+// GET request to get the user's star count
+export async function getStarCount(username) {
+    const URL = "http://localhost:8000/users/stars?username=" + username;
+    try {
+        const response = await fetch(URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to fetch notifications for " + username);
+        }
+
+        const data = await response.json();
+        console.log("Success:", data);
+        return data;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+
 // POST request to create a new user
 export async function createNewUser(user) {
     try {
@@ -90,7 +114,7 @@ export async function createNewUser(user) {
 
         const data = await response.json();
         console.log("Success:", data);
-        return;
+        return data;
     } catch (error) {
         console.error("Error:", error);
         throw error;
@@ -114,7 +138,7 @@ export async function addFriendship(username1, username2) {
 
         const data = await response.json();
         console.log("Success:", data);
-        return;
+        return data;
     } catch (error) {
         console.error("Error:", error);
         throw error;
@@ -139,7 +163,56 @@ export async function sendNotification(username, notification) {
 
         const data = await response.json();
         console.log("Success:", data);
-        return;
+        return data;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+
+// POST request to update the user's notifications
+export async function updateNotifications(username, notifications) {
+    const URL = "http://localhost:8000/users/notifications/update?username=" + username;
+    try {
+        const response = await fetch(URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(notifications)
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to send notification to " + username);
+        }
+
+        const data = await response.json();
+        console.log("Success:", data);
+        return data;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+
+// PUT request to give the user a star
+export async function giveStar(username) {
+    const URL = "http://localhost:8000/users/stars?username=" + username;
+    try {
+        const response = await fetch(URL, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        
+        if (!response.ok) {
+            throw new Error("Failed to give star to " + username);
+        }
+
+        const data = await response.json();
+        console.log("Success:", data);
+        return data;
     } catch (error) {
         console.error("Error:", error);
         throw error;

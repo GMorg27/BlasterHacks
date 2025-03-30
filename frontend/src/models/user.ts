@@ -5,11 +5,13 @@ export class User {
     tasks: string[];
     friends: string[];
     notifications: Notification[];
+    stars: number;
 
     constructor(name: string) {
         this.name = name;
         this.tasks = [];
         this.friends = [];
         this.notifications = [];
+        this.stars = 0;
     }
 }

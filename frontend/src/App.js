@@ -1,7 +1,9 @@
 import './styles.css';
 
+import { ReactComponent as StarIcon } from './assets/star.svg';
 import { useEffect, useState } from "react";
-import { createNewUser, getAllUsers, getUserFriends, addFriendship, getUserNotifications, sendNotification } from './accessors/userAccessor.js';
+
+import { createNewUser, getAllUsers, getUserFriends, addFriendship, getUserNotifications, sendNotification, getStarCount, giveStar, updateNotifications } from './accessors/userAccessor.js';
 import { User } from "./models/user.ts";
 import { getUserAssignments, uploadICSString, updateAssignments } from './accessors/assignmentAccessor.js';
 import { Notification } from './models/notification.ts';
@@ -13,19 +15,26 @@ function App() {
   const [allFriends, setAllFriends] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [allNotifs, setAllNotifs] = useState([]);
-  // const [ics, setIcs] = useState([]);
   const [assignments, setAllAssignments] = useState([]);
-  // const [showCompleted, setShowCompleted] = useState(false);
+  const [stars, setStars] = useState(0);
+  const [starDisplay, setStarDisplay] = useState([]);
+  
+  const boxWidth = 200;
+  const boxHeight = 150;
+  const starSize = 30;
 
-  // let filteredAssignments = assignments.filter((assignment) => 
-  //   showCompleted ? assignment.isComplete : !assignment.isComplete
-  // );
+  // Handle navigation with arrows
+  useEffect(() => {
+    const handlePopState = () => setCurrentPage(window.location.pathname);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   // Fetch the user list when the page loads
   useEffect(() => {
     getAllUsers()
-      .then((users) => setAllUsers(users))
-      .catch((error) => console.error("Error:", error));
+    .then((users) => setAllUsers(users))
+    .catch((error) => console.error("Error:", error));
   }, []); // Empty dependency array means this will run only once, when the page first loads.
 
   // Fetch assignments whenever currentPage changes to '/home'
@@ -45,21 +54,26 @@ function App() {
         getUserNotifications(loggedInUsername)
         .then((allNotifs) => setAllNotifs(allNotifs))
         .catch((error) => console.error("Error:", error));
+
+        getStarCount(loggedInUsername)
+        .then((count) => setStars(count))
+        .catch((error) => console.error("Error:", error));
+      }
+      else {
+        window.history.pushState({}, '', '/');
+        setCurrentPage('/');
       }
     }
   }, [currentPage]);
 
-  // const handleFilterChange = (event) => {
-  //   setShowCompleted(event.target.checked); // Update filter state
-  // };
-
-  // const handleCompletionToggle = (index) => {
-  //   const updateAssignments = assignments.map((assignment, i) =>
-  //     i === index ? { ...assignment, isComplete: !assignment.isComplete } : assignment
-  //   );
-  //   setAllAssignments(updateAssignments);
-  // };
-
+  // Update star locations
+  useEffect(() => {
+    setStarDisplay(Array.from({ length: stars }, (_, i) => ({
+      id: i,
+      x: Math.random() * (boxWidth - starSize), // Prevent overflow
+      y: Math.random() * (boxHeight - starSize),
+    })));
+  }, [stars]);
 
   function loginPressed() {
     if (username.trim() === "") {
@@ -117,8 +131,10 @@ function App() {
     localStorage.removeItem("username");
     setAllAssignments([]);
     setAllFriends([]);
-    setUsername([]);
-    setFriendname([]);
+    setAllNotifs([]);
+    setUsername("");
+    setFriendname("");
+    setStars(0);
   }
 
   function Settings() {
@@ -185,18 +201,30 @@ function App() {
   function completeAssignment(index) {
     let updatedAssignments = [...assignments];
     updatedAssignments[index] = { ...updatedAssignments[index], isCompleted: true };
+    setAllAssignments(updatedAssignments);
 
-    assignments[index].isCompleted = true;
-    updateAssignments(localStorage.getItem("username"), assignments)
-    .then((allAssignments) => {
-      setAllAssignments(updatedAssignments);
-
+    updateAssignments(localStorage.getItem("username"), updatedAssignments)
+    .then((data) => {
       const notif = new Notification(localStorage.getItem("username"), assignments[index].title);
       for (let friend of allFriends) {
         sendNotification(friend.name, notif)
         .catch((error) => console.error("Error:", error));
       }
     })
+    .catch((error) => console.error("Error:", error));
+  }
+
+  function giveStarPressed(notifIndex) {
+    let updatedNotifs = [...allNotifs];
+    const notif = updatedNotifs[notifIndex];
+
+    // Clear the notification
+    updatedNotifs.splice(notifIndex, 1);
+    setAllNotifs(updatedNotifs);
+    updateNotifications(localStorage.getItem("username"), updatedNotifs)
+    .catch((error) => console.error("Error:", error));
+
+    giveStar(notif.friendName)
     .catch((error) => console.error("Error:", error));
   }
 
@@ -227,7 +255,7 @@ function App() {
       )}
 
       {currentPage === '/home' && (
-        <div className="container">
+        <div className="column-container">
           <div className="module">
             <h1>Welcome, {localStorage.getItem("username")}!</h1>
 
@@ -241,63 +269,104 @@ function App() {
             <div className="scrollable" id="assignment-list">
               <ul>
                 {assignments.length === 0 ? (
-                  <li>No assignments left! Good job</li>) : (
-                    assignments.map((assignment, index) => (
-                    <li className={assignment.isCompleted ? 'card overlay' : 'card'} key={index}>
-                      <div className="column-container">
-                        <div className="column">
-                          <p id="title">{assignment.title}</p>
-                          <p id="date">Due: {assignment.dueDate}</p>
-                          <p id="desc">{assignment.description}</p>
-                        </div>
-                        {assignment.isCompleted ? null :
-                          <button
-                            onClick={() => completeAssignment(index)}
-                            style={{marginLeft : "5px"}}
-                          >
-                            Done
-                          </button>}
+                  <li>No assignments; upload a calendar file</li>) : (
+                  assignments.map((assignment, index) => (
+                  <li className={assignment.isCompleted ? 'card overlay' : 'card'} key={index}>
+                    <div className="column-container">
+                      <div className="column">
+                        <p id="title">{assignment.title}</p>
+                        <p id="date">Due: {assignment.dueDate}</p>
+                        <p id="desc">{assignment.description}</p>
                       </div>
-                    </li>
+                      {assignment.isCompleted ? null :
+                        <button
+                          onClick={() => completeAssignment(index)}
+                          style={{marginLeft : "5px"}}
+                        >
+                          Done
+                        </button>}
+                    </div>
+                  </li>
                   ))
                 )}
               </ul>
             </div>
           </div>
 
-          <div className="module">
-            <h2>Friends</h2>
-            <div>
-              <input
-                type="text"
-                id="friendname"
-                name="friendname"
-                value={friendname}
-                onChange={(e) => setFriendname(e.target.value)}
-              />
-            </div>
-            <div style={{marginTop: "5px", marginBottom: "25px"}}>
-              <button onClick={addFriendPressed}>Add Friend</button>
-            </div>
-            <div className="scrollable" id="friends-list">
-              <ul style={{width: "100%"}}>
-                {allFriends.map((friend, index) => (
-                  <div key={index} style={index % 2 === 0 ? {backgroundColor: "white"} : {backgroundColor : "#F7EEDE"}}>
-                    <p style={{margin: "2px"}}>{friend.name}</p>
-                  </div>
-                ))}
-              </ul>
+          <div className="column" id="friends-column">
+            <div className="module">
+              <h2>Friends</h2>
+              <div>
+                <input
+                  type="text"
+                  id="friendname"
+                  name="friendname"
+                  value={friendname}
+                  onChange={(e) => setFriendname(e.target.value)}
+                />
+              </div>
+              <div style={{marginTop: "5px", marginBottom: "25px"}}>
+                <button onClick={addFriendPressed}>Add Friend</button>
+              </div>
+              <div className="scrollable" id="friends-list">
+                <ul style={{width: "100%"}}>
+                  {allFriends.map((friend, index) => (
+                    <div key={index} style={index % 2 === 0 ? {backgroundColor: "white"} : {backgroundColor : "#F7EEDE"}}>
+                      <p style={{margin: "2px"}}>{friend.name}</p>
+                    </div>
+                  ))}
+                </ul>
+              </div>
+
+              <div style={{ textAlign: "left", marginTop: "10px" }}><h3>Friend Activity</h3></div>
+              <div className="scrollable" id="notifs-list">
+                <ul>
+                  {allNotifs.length === 0 ? (
+                    <li>Check back later</li>) : (
+                    allNotifs.map((notif, index) => (
+                      <li className="card-sm" key={index}>
+                        <div className="column-container">
+                          <div className="column">
+                            <p>{notif.friendName} completed {notif.title}</p>
+                          </div>
+                          <div className="column">
+                            <button style={{padding: "2px"}} onClick={() => giveStarPressed(index)}>
+                              <StarIcon width={25} height={25} />
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
             </div>
 
-            <div style={{ textAlign: "left", marginTop: "10px" }}><h3>Friend Activity</h3></div>
-            <div className="scrollable" id="notifs-list">
-              <ul>
-                {allNotifs.map((notif, index) => (
-                  <div className="card-sm" key={index}>
-                    <p>{notif.friendName} completed {notif.title}</p>
-                  </div>
+            <div class="column-container" style={ {alignItems: "center"} }>
+              <h1>{stars}</h1>
+              <div
+                style={{
+                  width: boxWidth,
+                  height: boxHeight,
+                  position: "relative",
+                  border: "3px solid black",
+                  borderRadius: "5px",
+                  backgroundColor: "white"
+                }}
+              >
+                {starDisplay.map((star) => (
+                  <StarIcon
+                    key={star.id}
+                    width={starSize}
+                    height={starSize}
+                    style={{
+                      position: "absolute",
+                      left: `${star.x}px`,
+                      top: `${star.y}px`,
+                    }}
+                  />
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
         </div>

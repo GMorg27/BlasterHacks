@@ -49,6 +49,7 @@ class UserModel(BaseModel):
     tasks: list[AssignmentModel] = Field(...)
     friends: list[str] = Field()
     notifications: list[NotificationModel] = Field()
+    stars: int = Field()
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
@@ -58,6 +59,7 @@ class UserModel(BaseModel):
                 "tasks": [],
                 "friends": [],
                 "notifications": [],
+                "stars": 0,
             }
         },
     )
@@ -68,9 +70,10 @@ class UpdateUserModel(BaseModel):
     Container for a user record.
     """
     name: Optional[str] = None
-    tasks: list[AssignmentModel] = None
-    friends: list[str] = None
-    notifications: list[NotificationModel] = None
+    tasks: Optional[list[AssignmentModel]] = None
+    friends: Optional[list[str]] = None
+    notifications: Optional[list[NotificationModel]] = None
+    stars: Optional[int] = None
     model_config = ConfigDict(
         populate_by_name=True,
         arbitrary_types_allowed=True,
@@ -78,6 +81,9 @@ class UpdateUserModel(BaseModel):
             "example": {
                 "name": "Jane Doe",
                 "tasks": [],
+                "friends": [],
+                "notifications": [],
+                "stars": 0,
             }
         },
     )

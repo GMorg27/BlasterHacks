@@ -127,7 +127,7 @@ button:hover {
 }
 
 #assignment-list {
-    height: 60vh;
+    height: 50vh;
 }
 
 #friends-list {
@@ -138,7 +138,7 @@ button:hover {
 }
 
 #notifs-list {
-    height: 30vh;
+    height: 20vh;
 }
 
 #title {
@@ -152,4 +152,8 @@ button:hover {
 
 #desc {
     font-size: 0.7em;
+}
+
+#friends-column {
+    align-items: center;
 }
